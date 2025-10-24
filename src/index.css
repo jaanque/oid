@@ -1,27 +1,107 @@
-html, body, #app-container {
+/* Reset y estilos base */
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Evita barras de scroll innecesarias */
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #1e1e1e; /* Color de fondo oscuro */
-  color: #d4d4d4;
+  background-color: #1e1e1e; /* Color de fondo oscuro de VS Code */
+  color: #cccccc; /* Texto más claro para mejor contraste */
 }
 
+/* Contenedor principal de la aplicación */
 #app-container {
   display: flex;
+  height: 100vh; /* Altura completa del viewport */
 }
 
+/* Panel del explorador de archivos */
 #file-explorer {
   width: 250px;
+  min-width: 200px; /* Ancho mínimo */
   height: 100%;
-  background-color: #252526;
+  background-color: #252526; /* Color de fondo del explorador de VS Code */
+  border-right: 1px solid #333333; /* Línea separadora */
   padding: 10px;
-  box-sizing: border-box; /* Asegura que el padding no añada anchura */
+  box-sizing: border-box;
+  overflow-y: auto; /* Permite el scroll si el contenido es muy largo */
+  color: #cccccc;
 }
 
-#editor-container {
-  flex-grow: 1; /* Ocupa el resto del espacio */
+/* Panel principal que contiene las pestañas y el editor */
+#main-panel {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
   height: 100%;
+}
+
+/* Contenedor de las pestañas */
+#tabs-container {
+  display: flex;
+  background-color: #252526;
+  flex-shrink: 0; /* Evita que se encoja */
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #2d2d2d;
+  border-right: 1px solid #252526;
+  cursor: pointer;
+  font-size: 0.9em;
+  color: #9e9e9e;
+}
+
+.tab-item.active {
+  background-color: #1e1e1e; /* Coincide con el fondo del editor */
+  color: #ffffff;
+}
+
+.tab-close-btn {
+  margin-left: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+.tab-close-btn:hover {
+  background-color: #3e3e3e;
+}
+
+/* Contenedor del editor */
+#editor-container {
+  flex-grow: 1; /* Ocupa el espacio restante */
+  height: 100%; /* Asegura que el editor se expanda correctamente */
+}
+
+/* --- Estilos para el Explorador de Archivos (movidos desde renderer.ts) --- */
+
+h2 {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase; /* Para que el título se vea más profesional */
+    color: #888888; /* Un color más sutil para el título */
+}
+
+.file-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    font-size: 0.9em;
+}
+
+.file-item:hover {
+    background-color: #2a2d2e; /* Color de hover de VS Code */
 }

@@ -36,6 +36,17 @@ ipcMain.handle('get-file-content', async (event, filePath: string) => {
   }
 });
 
+// Responde a la petición de guardar el contenido de un archivo
+ipcMain.handle('save-file', async (event, { filePath, content }: { filePath: string; content: string }) => {
+  try {
+    await fs.promises.writeFile(filePath, content, 'utf-8');
+    return { success: true };
+  } catch (error) {
+    console.error(`Error guardando el archivo: ${filePath}`, error);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
 
 // --- Creación de la Ventana Principal ---
 
@@ -67,6 +78,15 @@ const createWindow = () => {
               // Envía la ruta del directorio seleccionado al proceso de renderizado
               mainWindow.webContents.send('directory-opened', filePaths[0]);
             }
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'Guardar',
+          accelerator: 'CmdOrCtrl+S',
+          click() {
+            // Envía un evento al proceso de renderizado para que inicie la acción de guardar
+            mainWindow.webContents.send('save-file-request');
           },
         },
         { type: 'separator' },
