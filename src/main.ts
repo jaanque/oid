@@ -47,10 +47,52 @@ ipcMain.handle('save-file', async (event, { filePath, content }: { filePath: str
   }
 });
 
+// Responde a la petición de crear un nuevo archivo
+ipcMain.handle('create-file', async (event, filePath: string) => {
+  try {
+    await fs.promises.writeFile(filePath, '', 'utf-8'); // Crea un archivo vacío
+    return { success: true };
+  } catch (error) {
+    console.error(`Error creando el archivo: ${filePath}`, error);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
+// Responde a la petición de crear un nuevo directorio
+ipcMain.handle('create-directory', async (event, dirPath: string) => {
+  try {
+    await fs.promises.mkdir(dirPath);
+    return { success: true };
+  } catch (error) {
+    console.error(`Error creando el directorio: ${dirPath}`, error);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
 
 // --- Creación de la Ventana Principal ---
 
 const createWindow = () => {
+  // Menú contextual para el explorador de archivos
+  const fileExplorerContextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Nuevo Archivo',
+      click: (menuItem, browserWindow) => {
+        browserWindow.webContents.send('context-menu-command', 'new-file');
+      },
+    },
+    {
+      label: 'Nueva Carpeta',
+      click: (menuItem, browserWindow) => {
+        browserWindow.webContents.send('context-menu-command', 'new-directory');
+      },
+    },
+  ]);
+
+  ipcMain.on('show-context-menu', (event) => {
+    fileExplorerContextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
+  });
+
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
