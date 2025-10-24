@@ -1,8 +1,27 @@
-body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+html, body, #app-container {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Evita barras de scroll innecesarias */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #1e1e1e; /* Color de fondo oscuro */
+  color: #d4d4d4;
+}
+
+#app-container {
+  display: flex;
+}
+
+#file-explorer {
+  width: 250px;
+  height: 100%;
+  background-color: #252526;
+  padding: 10px;
+  box-sizing: border-box; /* Asegura que el padding no añada anchura */
+}
+
+#editor-container {
+  flex-grow: 1; /* Ocupa el resto del espacio */
+  height: 100%;
 }

@@ -1,23 +1,97 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, dialog } from 'electron';
 import path from 'node:path';
+import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+// Handle creando/quitando accesos directos
 if (started) {
   app.quit();
 }
 
+// --- Lógica de IPC (Inter-Process Communication) ---
+
+// Responde a la petición de leer el contenido de un directorio específico
+ipcMain.handle('get-directory-contents', async (event, directoryPath: string) => {
+  try {
+    const files = await fs.promises.readdir(directoryPath, { withFileTypes: true });
+    // Mapeamos para devolver solo el nombre y si es un directorio
+    return files.map(file => ({
+      name: file.name,
+      isDirectory: file.isDirectory(),
+    }));
+  } catch (error) {
+    console.error(`Error leyendo el directorio: ${directoryPath}`, error);
+    return [];
+  }
+});
+
+// Responde a la petición de leer el contenido de un archivo específico
+ipcMain.handle('get-file-content', async (event, filePath: string) => {
+  try {
+    const content = await fs.promises.readFile(filePath, 'utf-8');
+    return content;
+  } catch (error) {
+    console.error(`No se pudo leer el archivo: ${filePath}`, error);
+    return `// No se pudo cargar el archivo: ${filePath}`;
+  }
+});
+
+
+// --- Creación de la Ventana Principal ---
+
 const createWindow = () => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
     },
   });
 
-  // and load the index.html of the app.
+  // --- Definición del Menú de la Aplicación ---
+  const menuTemplate: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Abrir Directorio...',
+          accelerator: 'CmdOrCtrl+O',
+          async click() {
+            const { filePaths } = await dialog.showOpenDialog(mainWindow, {
+              properties: ['openDirectory'],
+              title: 'Selecciona un directorio',
+            });
+            
+            if (filePaths && filePaths.length > 0) {
+              // Envía la ruta del directorio seleccionado al proceso de renderizado
+              mainWindow.webContents.send('directory-opened', filePaths[0]);
+            }
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'Salir',
+          role: 'quit',
+          accelerator: 'CmdOrCtrl+Q',
+        },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(menuTemplate);
+  Menu.setApplicationMenu(menu);
+
+
+  // Carga la URL de desarrollo o el archivo HTML de producción
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
@@ -25,19 +99,12 @@ const createWindow = () => {
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
     );
   }
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+// --- Ciclo de Vida de la Aplicación ---
+
 app.on('ready', createWindow);
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -45,12 +112,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
