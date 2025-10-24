@@ -124,7 +124,7 @@ function closeFile(filePath: string) {
 }
 tabsContainerElement?.addEventListener('click', (e) => {
   const target = e.target as HTMLElement;
-  const tabElement = target.closest('.tab-item');
+  const tabElement = target.closest('.tab-item') as HTMLElement | null;
   if (!tabElement) return;
   const filePath = tabElement.dataset.filePath!;
   if (target.classList.contains('tab-close-btn')) {
@@ -205,7 +205,8 @@ async function loadFileTree(directoryPath: string) {
 // --- Lógica de Creación y Guardado ---
 async function handleNewItem(type: 'file' | 'directory') {
   const targetPath = contextMenuTargetPath;
-  const isTargetDirectory = document.querySelector(`[data-path="${targetPath}"]`)?.dataset.isDirectory === 'true';
+  const targetElement = document.querySelector(`[data-path="${targetPath}"]`) as HTMLElement | null;
+  const isTargetDirectory = targetElement?.dataset.isDirectory === 'true';
   const parentDir = isTargetDirectory ? targetPath : path.dirname(targetPath);
   const itemName = prompt(`Introduce el nombre:`);
   if (!itemName) return;

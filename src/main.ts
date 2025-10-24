@@ -78,13 +78,17 @@ const createWindow = () => {
     {
       label: 'Nuevo Archivo',
       click: (menuItem, browserWindow) => {
-        browserWindow.webContents.send('context-menu-command', 'new-file');
+        if (browserWindow) {
+          browserWindow.webContents.send('context-menu-command', 'new-file');
+        }
       },
     },
     {
       label: 'Nueva Carpeta',
       click: (menuItem, browserWindow) => {
-        browserWindow.webContents.send('context-menu-command', 'new-directory');
+        if (browserWindow) {
+          browserWindow.webContents.send('context-menu-command', 'new-directory');
+        }
       },
     },
   ]);

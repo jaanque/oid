@@ -10,13 +10,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Eventos del Main al Renderer (Send/On)
   onDirectoryOpened: (callback: (path: string) => void) => {
-    ipcRenderer.on('directory-opened', (event, path) => callback(path));
+    ipcRenderer.on('directory-opened', (event: Electron.IpcRendererEvent, path: string) => callback(path));
   },
   onSaveFileRequest: (callback: () => void) => {
     ipcRenderer.on('save-file-request', () => callback());
   },
   showContextMenu: () => ipcRenderer.send('show-context-menu'),
   onContextMenuCommand: (callback: (command: string) => void) => {
-    ipcRenderer.on('context-menu-command', (event, command) => callback(command));
+    ipcRenderer.on('context-menu-command', (event: Electron.IpcRendererEvent, command: string) => callback(command));
   },
 });
